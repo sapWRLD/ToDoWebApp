@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
 from time import gmtime,strftime
+from datetime import datetime
 
 app = Flask(__name__)
 TASK_FILE = "task.json"
+TODAY = datetime.now().strftime("%Y-%m-%d")
 
 tags = ["Work", "Personal", "Study", "Home"]
 
@@ -28,12 +30,13 @@ def add_task():
     task_text = request.form.get("task", "").strip()
     priority = request.form.get("priority", "").upper()
     tag = request.form.get("tag", "")
+    due_date = request.form.get("due_date", "")
 
-    if not task_text or priority not in ["HIGH", "MEDIUM", "LOW"] or tag not in tags:
+    if not task_text or priority not in ["HIGH", "MEDIUM", "LOW"] or tag not in tags or due_date <= TODAY:
         return redirect(url_for("dashboard"))
     
-    timestamp = strftime("%a, %d %b %Y %H:%M:%S", gmtime())
-    task_entry = f"[{tag}] {task_text} | {timestamp}"
+    timestamp = strftime("%d %b %Y %H:%M", gmtime())
+    task_entry = f"[{tag}] {task_text} Due By: {due_date} | {timestamp}"
 
     tasks = load_task()
     tasks[priority].append(task_entry)
